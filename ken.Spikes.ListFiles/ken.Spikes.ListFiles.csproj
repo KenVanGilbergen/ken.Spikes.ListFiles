@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Implementations\DirectoryRecursive.cs" />
     <Compile Include="Implementations\DirectoryInfoEnumerateFiles.cs" />
     <Compile Include="ken.Windows\FindFiles\FindFiles.cs" />
     <Compile Include="Implementations\FindFilesEnumerateFiles.cs" />

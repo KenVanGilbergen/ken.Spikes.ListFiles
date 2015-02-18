@@ -8,6 +8,8 @@ using System.Security;
 using System.Security.Permissions;
 using Microsoft.Win32.SafeHandles;
 
+// http://www.codeproject.com/Articles/38959/A-Faster-Directory-Enumerator
+
 // ReSharper disable once CheckNamespace
 namespace ken.Windows
 {

@@ -9,16 +9,26 @@ using ken.Windows;
 
 namespace ken.Spikes.ListFiles
 {
+    //TODO: retry/skip access denied errrors - https://msdn.microsoft.com/en-us/library/dd997370(v=vs.110).aspx
     class Program
     {
-        //private const string SourceDir = @"D:\Websites";
-        private const string SourceDir = @"D:\Websites\multiple_sites_red";
-        private const bool WriteToConsole = false;
-        //private const string SourceDir = @"D:\Websites\foo";
-        //private const bool WriteToConsole = true;
+        //private const string DefaultDir = @"D:\Websites\foo";
+        private const string DefaultDir = @"D:\Websites\multiple_sites_red";
+        //private const string DefaultDir = @"D:\Websites";
+        private const bool DefaultWriteToConsole = true;
 
         private static void Main(string[] args)
         {
+            Console.Write("Directory to enumerate [{0}]: ", DefaultDir);
+            var sourceDir = Console.ReadLine();
+            if (String.IsNullOrWhiteSpace(sourceDir)) sourceDir = DefaultDir;
+
+            Console.WriteLine("Write to console [{0}]: ", DefaultWriteToConsole ? "y" : "n");
+            var press = Console.ReadKey();
+            var writeToConsole = DefaultWriteToConsole;
+            if ((press.KeyChar == 'Y') || (press.KeyChar == 'y')) writeToConsole = true;
+            else if ((press.KeyChar == 'N') || (press.KeyChar == 'n')) writeToConsole = false;
+
             var sw = new Stopwatch();
 
             var results = new Dictionary<string, long>();
@@ -28,11 +38,13 @@ namespace ken.Spikes.ListFiles
                 Implementation.DirectoryGetFilesWithYield,
                 Implementation.DirectoryInfoEnumerateFilesFullName,
                 Implementation.FindFilesEnumerateFilesPath,
+                Implementation.DirectoryRecursiveFullName,
             };
 
             var actionsFileInfo = new List<Func<string, IEnumerable<FileInfo>>>
             {
-                Implementation.DirectoryInfoEnumerateFiles
+                Implementation.DirectoryInfoEnumerateFiles,
+                Implementation.DirectoryRecursive
             };
 
             var actionsFileData = new List<Func<string, IEnumerable<FileData>>>
@@ -46,9 +58,9 @@ namespace ken.Spikes.ListFiles
                 {
                     Console.Write("===== {0} =====", action.Method.Name + i);
                     sw.Restart();
-                    foreach (var file in action.Invoke(SourceDir))
+                    foreach (var file in action.Invoke(sourceDir))
                     {
-                        if (WriteToConsole) Console.WriteLine(file);
+                        if (writeToConsole) Console.WriteLine(file);
                     }
                     sw.Stop();
                     results.Add(action.Method.Name + i, sw.ElapsedMilliseconds);
@@ -62,9 +74,9 @@ namespace ken.Spikes.ListFiles
             {
                 Console.Write("===== {0} =====", action.Method.Name);
                 sw.Restart();
-                foreach (var fileInfo in action.Invoke(SourceDir))
+                foreach (var fileInfo in action.Invoke(sourceDir))
                 {
-                    if (WriteToConsole) Console.WriteLine("{0} {1}", fileInfo.FullName, fileInfo.LastWriteTimeUtc);
+                    if (writeToConsole) Console.WriteLine("{0} {1}", fileInfo.FullName, fileInfo.LastWriteTimeUtc);
                 }
                 sw.Stop();
                 results.Add(action.Method.Name, sw.ElapsedMilliseconds);
@@ -75,9 +87,9 @@ namespace ken.Spikes.ListFiles
             {
                 Console.Write("===== {0} =====", action.Method.Name);
                 sw.Restart();
-                foreach (var fileData in action.Invoke(SourceDir))
+                foreach (var fileData in action.Invoke(sourceDir))
                 {
-                    if (WriteToConsole) Console.WriteLine("{0} {1}", fileData.Path, fileData.LastWriteTimeUtc);
+                    if (writeToConsole) Console.WriteLine("{0} {1}", fileData.Path, fileData.LastWriteTimeUtc);
                 }
                 sw.Stop();
                 results.Add(action.Method.Name, sw.ElapsedMilliseconds);
