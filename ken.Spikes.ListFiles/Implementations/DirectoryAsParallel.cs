@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ken.Spikes.ListFiles.Implementations
 {
@@ -16,6 +19,4 @@ namespace ken.Spikes.ListFiles.Implementations
             return files;
         }
     }
-
-
 }

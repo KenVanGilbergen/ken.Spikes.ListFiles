@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -40,7 +39,8 @@ namespace ken.Spikes.ListFiles
                 Implementation.DirectoryInfoEnumerateFilesFullName,
                 Implementation.FindFilesEnumerateFilesPath,
                 Implementation.DirectoryRecursiveFullName,
-                Implementation.DirectoryAsParallel
+                Implementation.DirectoryAsParallel,
+                Implementation.DirectoryAsStack,
             };
 
             var actionsFileInfo = new List<Func<string, IEnumerable<FileInfo>>>
@@ -144,3 +144,39 @@ namespace ken.Spikes.ListFiles
         }
     }
 }
+
+
+//@"D:\Websites" for 174317 files.
+//
+//DirectoryRecursiveFullName1: 2131ms
+//DirectoryRecursive3: 2185
+//DirectoryRecursive2: 2196
+//DirectoryRecursiveFullName3: 2271
+//DirectoryRecursiveFullName2: 2411
+//DirectoryRecursive1: 3203
+//DirectoryAsParallel1: 3910
+//DirectoryAsParallel2: 3915
+//DirectoryAsParallel3: 3933
+//DirectoryGetFilesWithYield1: 3949
+//DirectoryGetFiles3: 3951
+//DirectoryGetFilesWithYield2: 3991
+//DirectoryGetFilesWithYield3: 4000
+//DirectoryGetFiles2: 4009
+//FindFilesEnumerateFilesPath3: 4556
+//FindFilesEnumerateFilesPath2: 4563
+//FindFilesEnumerateFilesPath1: 4586
+//DirectoryInfoEnumerateFiles1: 4618
+//FindFilesEnumerateFiles3: 4643
+//DirectoryInfoEnumerateFiles3: 4644
+//FindFilesEnumerateFiles1: 4667
+//DirectoryInfoEnumerateFiles2: 4696
+//FindFilesEnumerateFiles2: 4763
+//DirectoryAsStack3: 5255
+//DirectoryAsStack1: 5260
+//DirectoryAsStack2: 5282
+//DirectoryInfoEnumerateFilesFullName2: 5819
+//DirectoryInfoEnumerateFilesFullName1: 5830
+//DirectoryInfoEnumerateFilesFullName3: 5834
+//Async: 5892
+//AsyncWithBag: 6091
+//DirectoryGetFiles1: 75543

@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Implementations\DirectoryAsStack.cs" />
     <Compile Include="Implementations\DirectoryAsParallel.cs" />
     <Compile Include="Implementations\DirectoryRecursiveAsync.cs" />
     <Compile Include="Implementations\DirectoryRecursive.cs" />
