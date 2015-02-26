@@ -41,6 +41,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Implementations\DirectoryAsParallel.cs" />
+    <Compile Include="Implementations\DirectoryRecursiveAsync.cs" />
     <Compile Include="Implementations\DirectoryRecursive.cs" />
     <Compile Include="Implementations\DirectoryInfoEnumerateFiles.cs" />
     <Compile Include="ken.Windows\FindFiles\FindFiles.cs" />

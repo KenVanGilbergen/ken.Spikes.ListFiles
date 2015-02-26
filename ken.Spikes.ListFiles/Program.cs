@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -15,7 +16,7 @@ namespace ken.Spikes.ListFiles
         //private const string DefaultDir = @"D:\Websites\foo";
         private const string DefaultDir = @"D:\Websites\multiple_sites_red";
         //private const string DefaultDir = @"D:\Websites";
-        private const bool DefaultWriteToConsole = true;
+        private const bool DefaultWriteToConsole = false;
 
         private static void Main(string[] args)
         {
@@ -39,6 +40,7 @@ namespace ken.Spikes.ListFiles
                 Implementation.DirectoryInfoEnumerateFilesFullName,
                 Implementation.FindFilesEnumerateFilesPath,
                 Implementation.DirectoryRecursiveFullName,
+                Implementation.DirectoryAsParallel
             };
 
             var actionsFileInfo = new List<Func<string, IEnumerable<FileInfo>>>
@@ -56,47 +58,84 @@ namespace ken.Spikes.ListFiles
             {
                 foreach (var action in actions)
                 {
-                    Console.Write("===== {0} =====", action.Method.Name + i);
+                    Console.WriteLine("===== {0} =====", action.Method.Name + i);
                     sw.Restart();
-                    foreach (var file in action.Invoke(sourceDir))
+                    var files = action.Invoke(sourceDir).ToList();
+                    foreach (var file in files)
                     {
                         if (writeToConsole) Console.WriteLine(file);
                     }
                     sw.Stop();
                     results.Add(action.Method.Name + i, sw.ElapsedMilliseconds);
-                    Console.WriteLine("> {0}", sw.ElapsedMilliseconds);
+                    Console.WriteLine("> {0}ms for {1} files.", sw.ElapsedMilliseconds, files.Count);
                 }
                 if (i == 1) actions.Reverse();
                 if (i == 2) actions.Shuffle();
             }
 
-            foreach (var action in actionsFileInfo)
+            for (var i = 1; i <= 3; i++)
             {
-                Console.Write("===== {0} =====", action.Method.Name);
-                sw.Restart();
-                foreach (var fileInfo in action.Invoke(sourceDir))
+                foreach (var action in actionsFileInfo)
                 {
-                    if (writeToConsole) Console.WriteLine("{0} {1}", fileInfo.FullName, fileInfo.LastWriteTimeUtc);
+                    Console.WriteLine("===== {0} =====", action.Method.Name);
+                    sw.Restart();
+                    var fileInfos = action.Invoke(sourceDir).ToList();
+                    foreach (var fileInfo in fileInfos)
+                    {
+                        if (writeToConsole) Console.WriteLine("{0} {1}", fileInfo.FullName, fileInfo.LastWriteTimeUtc);
+                    }
+                    sw.Stop();
+                    results.Add(action.Method.Name + i, sw.ElapsedMilliseconds);
+                    Console.WriteLine("> {0}ms for {1} files.", sw.ElapsedMilliseconds, fileInfos.Count);
                 }
-                sw.Stop();
-                results.Add(action.Method.Name, sw.ElapsedMilliseconds);
-                Console.WriteLine("> {0}", sw.ElapsedMilliseconds);
+                if (i == 1) actions.Reverse();
+                if (i == 2) actions.Shuffle();
             }
 
-            foreach (var action in actionsFileData)
+            for (var i = 1; i <= 3; i++)
             {
-                Console.Write("===== {0} =====", action.Method.Name);
-                sw.Restart();
-                foreach (var fileData in action.Invoke(sourceDir))
+                foreach (var action in actionsFileData)
                 {
-                    if (writeToConsole) Console.WriteLine("{0} {1}", fileData.Path, fileData.LastWriteTimeUtc);
+                    Console.WriteLine("===== {0} =====", action.Method.Name);
+                    sw.Restart();
+                    var fileDatas = action.Invoke(sourceDir).ToList();
+                    foreach (var fileData in fileDatas)
+                    {
+                        if (writeToConsole) Console.WriteLine("{0} {1}", fileData.Path, fileData.LastWriteTimeUtc);
+                    }
+                    sw.Stop();
+                    results.Add(action.Method.Name + i, sw.ElapsedMilliseconds);
+                    Console.WriteLine("> {0}ms for {1} files.", sw.ElapsedMilliseconds, fileDatas.Count);
                 }
-                sw.Stop();
-                results.Add(action.Method.Name, sw.ElapsedMilliseconds);
-                Console.WriteLine("> {0}", sw.ElapsedMilliseconds);
+                if (i == 1) actions.Reverse();
+                if (i == 2) actions.Shuffle();
             }
 
-            foreach (var result in results.OrderBy(_ => _.Key))
+            Console.WriteLine("===== {0} =====", "Async");
+            sw.Restart();
+            var fis = Implementation.DirectoryRecursiveAsync(sourceDir).GetAwaiter().GetResult().ToList();
+            foreach (var fileData in fis)
+            {
+                if (writeToConsole) Console.WriteLine("{0} {1}", fileData.Name, fileData.LastWriteTimeUtc);
+            }
+            sw.Stop();
+            results.Add("Async", sw.ElapsedMilliseconds);
+            Console.WriteLine("> {0}ms for {1} files.", sw.ElapsedMilliseconds, fis.Count);
+
+            Console.WriteLine("===== {0} =====", "AsyncWithBag");
+            sw.Restart();
+            fis = Implementation.DirectoryRecursiveAsyncWithBag(sourceDir).GetAwaiter().GetResult().ToList();
+            foreach (var fileData in fis)
+            {
+                if (writeToConsole) Console.WriteLine("{0} {1}", fileData.Name, fileData.LastWriteTimeUtc);
+            }
+            sw.Stop();
+            results.Add("AsyncWithBag", sw.ElapsedMilliseconds);
+            Console.WriteLine("> {0}ms for {1} files.", sw.ElapsedMilliseconds, fis.Count);
+
+            Console.WriteLine();
+            Console.WriteLine();
+            foreach (var result in results.OrderBy(_ => _.Value))
             {
                 Console.WriteLine("{0}: {1}", result.Key, result.Value);
             }
